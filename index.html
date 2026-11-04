@@ -8,217 +8,233 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Prompt for Cute & Friendly Thai UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     body {
-      background-color: #0b1120;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f1f5f9;
+      font-family: 'Prompt', system-ui, -apple-system, sans-serif;
+      color: #334155;
     }
-    .water-wave {
-      background: linear-gradient(180deg, rgba(56, 189, 248, 0.5) 0%, rgba(2, 132, 199, 0.9) 100%);
-      transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    .water-wave-cute {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.65) 0%, rgba(14, 165, 233, 0.88) 100%);
+      transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     #map {
       height: 100%;
       width: 100%;
-      border-radius: 1rem;
+      border-radius: 1.25rem;
       z-index: 10;
     }
-    /* Hide scrollbars */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Cute floating animation for rubber duck */
+    @keyframes duckFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(-4deg); }
+    }
+    .floating-duck {
+      animation: duckFloat 2.4s ease-in-out infinite;
+    }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 text-slate-100">
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 bg-slate-100">
 
-  <!-- Main Mobile App Shell -->
-  <div class="w-full max-w-md bg-slate-900 sm:border-4 sm:border-slate-800 sm:rounded-[36px] shadow-2xl overflow-hidden flex flex-col h-screen sm:h-[820px] relative">
+  <!-- Mobile Frame Container (Minimal Light Clean) -->
+  <div class="w-full max-w-md bg-white sm:border-8 sm:border-slate-200/80 sm:rounded-[40px] shadow-2xl overflow-hidden flex flex-col h-screen sm:h-[820px] relative">
     
-    <!-- Top Status Bar (Mobile feel) -->
-    <div class="bg-slate-950 px-5 py-2 flex justify-between items-center text-xs text-slate-400 select-none z-30 shrink-0">
-      <span class="font-bold text-slate-200" id="liveClock">12:00</span>
-      <div class="w-20 h-4 bg-slate-800 rounded-full mx-auto hidden sm:block"></div>
+    <!-- Top Status Bar (Minimal) -->
+    <div class="bg-white/90 backdrop-blur-sm px-6 py-2 flex justify-between items-center text-xs text-slate-400 select-none z-30 shrink-0 border-b border-slate-100">
+      <span class="font-bold text-slate-700 font-mono" id="liveClock">08:55</span>
+      <div class="w-16 h-3 bg-slate-200/70 rounded-full mx-auto hidden sm:block"></div>
       <div class="flex items-center space-x-2 text-xs">
-        <span class="text-[11px] text-cyan-400 font-mono" id="gpsStatusBadge"><i class="fa-solid fa-satellite-dish animate-pulse"></i> GPS พร้อม</span>
-        <i class="fa-solid fa-wifi text-slate-300"></i>
-        <i class="fa-solid fa-battery-full text-emerald-400"></i>
+        <span class="text-[11px] text-teal-600 font-medium flex items-center gap-1" id="gpsStatusBadge">
+          <i class="fa-solid fa-satellite text-teal-500 animate-pulse"></i> GPS พร้อม
+        </span>
+        <i class="fa-solid fa-wifi text-slate-400"></i>
+        <i class="fa-solid fa-battery-full text-emerald-500"></i>
       </div>
     </div>
 
-    <!-- App Header -->
-    <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-600 px-4 py-3 shadow-md z-20 flex items-center justify-between shrink-0">
+    <!-- App Header (Soft Pastel Gradient) -->
+    <header class="bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 px-4 py-3 shadow-sm z-20 flex items-center justify-between shrink-0">
       <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-          <i class="fa-solid fa-house-chimney-crack text-cyan-300 text-lg"></i>
+        <div class="w-10 h-10 rounded-2xl bg-white/90 shadow-sm flex items-center justify-center text-sky-500 text-xl">
+          🏡
         </div>
         <div>
-          <div class="text-[11px] font-bold text-cyan-200 tracking-wider uppercase">GeoAI & ชุมชนปลอดภัย</div>
-          <h1 class="text-base font-black text-white flex items-center gap-1.5 leading-tight">
+          <div class="text-[10px] font-bold text-sky-900/80 tracking-wider uppercase">ชุมชนปลอดภัยไร้น้ำท่วม</div>
+          <h1 class="text-base font-bold text-white flex items-center gap-1.5 leading-tight drop-shadow-sm">
             FloodSafe Life
-            <span class="bg-emerald-500/30 text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-400/40">ออนไลน์</span>
+            <span class="bg-white/30 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm">สด</span>
           </h1>
         </div>
       </div>
 
-      <button onclick="switchTab('sos')" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg shadow-rose-600/40 animate-pulse">
-        <i class="fa-solid fa-triangle-exclamation"></i> ขอความช่วยเหลือ
+      <button onclick="switchTab('sos')" class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md shadow-rose-500/30 transition">
+        <i class="fa-solid fa-bell animate-bounce text-xs"></i> ขอความช่วยเหลือ
       </button>
     </header>
 
     <!-- App Body (Scrollable Screen) -->
-    <main class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-950 p-3 pb-24 space-y-3">
+    <main class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50 p-3.5 pb-24 space-y-3">
       
       <!-- ========================================== -->
       <!-- TAB 1: สถานะบ้านฉัน (HOME / REAL-TIME RISK) -->
       <!-- ========================================== -->
       <section id="tab-risk" class="space-y-3">
         
-        <!-- Live GPS & Address Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-sm">
+        <!-- Live GPS & Address Card (Minimal Card) -->
+        <div class="bg-white border border-slate-100 rounded-3xl p-3.5 shadow-sm">
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-start gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
-                <i class="fa-solid fa-location-dot text-base"></i>
+              <div class="w-8 h-8 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 mt-0.5">
+                <i class="fa-solid fa-location-dot text-sm"></i>
               </div>
               <div>
-                <span class="text-xs text-slate-400 font-medium">ตำแหน่งบ้านของคุณ (พิกัด GPS จริง):</span>
-                <div class="text-xs font-bold text-slate-100 mt-0.5 leading-snug" id="userAddress">
-                  กำลังค้นหาตำแหน่งผ่านดาวเทียม...
+                <span class="text-xs text-slate-400 font-medium">ตำแหน่งบ้านของคุณ:</span>
+                <div class="text-xs font-bold text-slate-800 mt-0.5 leading-snug" id="userAddress">
+                  ริมแม่น้ำกก ชุมชนร่องเสือเต้น อ.เมือง จ.เชียงราย
                 </div>
                 <div class="text-[11px] text-slate-400 font-mono mt-0.5" id="userCoords">
-                  Lat: --, Lon: --
+                  Lat: 19.9105, Lon: 99.8406
                 </div>
               </div>
             </div>
 
-            <button onclick="getLiveLocation()" class="text-cyan-400 text-xs shrink-0 px-2.5 py-1.5 bg-cyan-950/70 hover:bg-cyan-900 active:scale-95 rounded-xl border border-cyan-800 flex items-center gap-1 shadow-sm transition">
-              <i class="fa-solid fa-location-crosshairs text-xs" id="gpsSpin"></i> จับพิกัดฉัน
+            <button onclick="getLiveLocation()" class="text-sky-600 text-xs shrink-0 px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 active:scale-95 rounded-2xl border border-sky-100 flex items-center gap-1 font-medium transition">
+              <i class="fa-solid fa-location-crosshairs text-xs" id="gpsSpin"></i> จับพิกัด
             </button>
           </div>
 
-          <!-- Quick Preset Cities Toggle -->
-          <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-            <span class="text-slate-400 text-[11px]">หรือทดลองเลือกพื้นที่เสี่ยง:</span>
-            <div class="flex gap-1">
-              <button onclick="setCustomLocation(19.9105, 99.8406, 'ริมแม่น้ำกก อ.เมือง จ.เชียงราย')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[11px] rounded text-slate-300">เชียงราย</button>
-              <button onclick="setCustomLocation(20.4286, 99.8833, 'ชุมชนสายลมจอย อ.แม่สาย')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[11px] rounded text-slate-300">แม่สาย</button>
-              <button onclick="setCustomLocation(13.7563, 100.5018, 'เขตบางพลัด ริมแม่น้ำเจ้าพระยา กทม.')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[11px] rounded text-slate-300">กทม.</button>
+          <!-- Quick Location Presets -->
+          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-400 text-[11px]">จุดทดสอบยอดฮิต:</span>
+            <div class="flex gap-1.5">
+              <button onclick="setCustomLocation(19.9105, 99.8406, 'ริมแม่น้ำกก อ.เมือง เชียงราย')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] rounded-xl text-slate-600 font-medium transition">เชียงราย</button>
+              <button onclick="setCustomLocation(20.4286, 99.8833, 'ชุมชนสายลมจอย อ.แม่สาย')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] rounded-xl text-slate-600 font-medium transition">แม่สาย</button>
+              <button onclick="setCustomLocation(13.7563, 100.5018, 'ริมแม่น้ำเจ้าพระยา กทม.')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-[11px] rounded-xl text-slate-600 font-medium transition">กทม.</button>
             </div>
           </div>
         </div>
 
-        <!-- BIG STATUS HERO CARD: สัญญาณไฟและระดับน้ำที่เข้าใจทันที -->
-        <div id="statusCard" class="bg-gradient-to-b from-rose-950/80 via-rose-900/30 to-slate-900 border-2 border-rose-500/90 rounded-2xl p-4 shadow-xl text-center relative overflow-hidden transition-colors duration-500">
+        <!-- CUTE STATUS HERO CARD: สัญญาณเตือนภัยโทนสว่าง น่ารัก เป็นมิตร -->
+        <div id="statusCard" class="bg-gradient-to-br from-rose-50 via-red-50 to-amber-50 border-2 border-rose-200/90 rounded-3xl p-4 shadow-sm text-center relative overflow-hidden transition-all duration-500">
           
-          <div id="alertBadge" class="inline-flex items-center gap-1.5 bg-rose-600 text-white font-extrabold text-xs px-3.5 py-1 rounded-full shadow-md animate-bounce mb-2">
-            <i class="fa-solid fa-triangle-exclamation"></i> เสี่ยงน้ำท่วมสูงมากใน 6-12 ชม. นี้
+          <!-- Cute Alert Badge -->
+          <div id="alertBadge" class="inline-flex items-center gap-1.5 bg-rose-500 text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm animate-bounce mb-2">
+            <i class="fa-solid fa-cloud-showers-water text-xs"></i> เสี่ยงน้ำท่วมสูงใน 6-12 ชม. นี้
           </div>
 
-          <div class="my-2 flex items-center justify-center gap-4">
-            <div id="waterIconContainer" class="w-16 h-16 rounded-2xl bg-rose-500/20 border-2 border-rose-500 flex flex-col items-center justify-center">
-              <i class="fa-solid fa-water text-rose-400 text-2xl"></i>
-              <span class="text-[10px] font-bold text-rose-200 mt-0.5">ระดับน้ำ</span>
+          <!-- Cute Gauge Area -->
+          <div class="my-2.5 flex items-center justify-center gap-4">
+            <div class="w-16 h-16 rounded-3xl bg-white shadow-sm border border-rose-100 flex flex-col items-center justify-center text-3xl">
+              🌊
             </div>
             <div class="text-left">
-              <div class="text-xs text-rose-300 font-medium">คาดการณ์น้ำหน้าบ้านสูง:</div>
-              <div class="text-2xl font-black text-white leading-tight" id="predictedDepthText">
-                40 - 60 <span class="text-sm font-bold text-rose-300">ซม.</span>
+              <div class="text-xs text-slate-500 font-medium">ระดับน้ำที่คาดว่าจะมาถึง:</div>
+              <div class="text-2xl font-black text-rose-600 leading-tight" id="predictedDepthText">
+                40 - 60 <span class="text-sm font-bold text-slate-600">ซม.</span>
               </div>
-              <div class="text-xs font-bold text-amber-300 flex items-center gap-1 mt-0.5" id="depthHumanDesc">
-                <i class="fa-solid fa-person-arrow-up-from-line"></i> สูงระดับหัวเข่า (รถเล็กผ่านไม่ได้)
+              <div class="text-xs font-bold text-amber-700 flex items-center gap-1 mt-0.5" id="depthHumanDesc">
+                <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> สูงระดับหัวเข่า (รถเล็กควรเลี่ยง)
               </div>
             </div>
           </div>
 
-          <!-- Real-Time Rain & Arrival Window from Open-Meteo API -->
-          <div class="mt-3 bg-slate-950/85 rounded-xl p-2.5 border border-slate-800 text-xs flex items-center justify-between">
-            <div class="text-slate-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-cloud-showers-heavy text-sky-400"></i>
-              <span>ฝนสะสมจริง: <b class="text-cyan-300" id="liveRainMM">กำลังโหลด...</b></span>
+          <!-- Weather & Rain Info Bar -->
+          <div class="mt-3 bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 border border-rose-100 text-xs flex items-center justify-between shadow-2xs">
+            <div class="text-slate-600 flex items-center gap-1.5">
+              <span class="text-base">🌧️</span>
+              <span>ปริมาณฝนจริง: <b class="text-sky-600" id="liveRainMM">กำลังคำนวณ...</b></span>
             </div>
-            <div class="text-rose-300 font-bold bg-rose-950/80 px-2 py-0.5 rounded border border-rose-800 text-[11px]" id="arrivalTimeTag">
+            <div class="text-rose-600 font-bold bg-rose-100/70 px-2.5 py-1 rounded-xl text-[11px]" id="arrivalTimeTag">
               มวลน้ำถึง: 19:00 - 21:00 น.
             </div>
           </div>
         </div>
 
-        <!-- 3 ACTION STEPS FOR CITIZENS: สิ่งที่ต้องทำทันที -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-              <i class="fa-solid fa-list-check"></i> 3 สิ่งที่ต้องทำทันทีตอนนี้:
+        <!-- 3 ACTION STEPS: 3 สิ่งที่ต้องทำทันที (การ์ดมินิมอล) -->
+        <div class="bg-white border border-slate-100 rounded-3xl p-3.5 shadow-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="text-base">⚡</span> 3 สิ่งที่ควรทำก่อนน้ำมาถึง:
             </h2>
-            <span class="text-[11px] text-slate-400">ควรเสร็จก่อนมวลน้ำถึง</span>
+            <span class="text-[11px] text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-lg">ทำทันที</span>
           </div>
 
           <div class="space-y-2 text-xs">
-            <div class="p-2.5 bg-slate-800/70 rounded-xl border border-slate-700/80 flex items-start gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">1</div>
+            <div class="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5 hover:bg-slate-100/80 transition">
+              <div class="w-6 h-6 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
               <div class="flex-1">
-                <div class="font-bold text-slate-100">สับคัตเอาต์ตัดไฟชั้นล่าง</div>
-                <div class="text-[11px] text-slate-400">ป้องกันไฟฟ้ารั่ว ย้ายปลั๊กพ่วงและเครื่องใช้ไฟฟ้าขึ้นชั้น 2</div>
+                <div class="font-bold text-slate-700">สับคัตเอาต์ตัดไฟชั้นล่าง</div>
+                <div class="text-[11px] text-slate-500">ป้องกันไฟฟ้ารั่ว ย้ายปลั๊กและเครื่องใช้ไฟฟ้าขึ้นชั้น 2</div>
               </div>
             </div>
 
-            <div class="p-2.5 bg-slate-800/70 rounded-xl border border-slate-700/80 flex items-start gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">2</div>
+            <div class="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5 hover:bg-slate-100/80 transition">
+              <div class="w-6 h-6 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
               <div class="flex-1">
-                <div class="font-bold text-slate-100">ย้ายรถยนต์และมอเตอร์ไซค์ไปที่สูง</div>
-                <div class="text-[11px] text-slate-400">จุดจอดปลอดภัยใกล้คุณ: ลานวัด/โรงเรียนเทศบาล</div>
+                <div class="font-bold text-slate-700">ย้ายรถยนต์และมอเตอร์ไซค์ไปที่สูง</div>
+                <div class="text-[11px] text-slate-500">จุดจอดปลอดภัยแนะนำ: ลานวัด/โรงเรียนเทศบาลใกล้เคียง</div>
               </div>
             </div>
 
-            <div class="p-2.5 bg-slate-800/70 rounded-xl border border-slate-700/80 flex items-start gap-2.5">
-              <div class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">3</div>
+            <div class="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5 hover:bg-slate-100/80 transition">
+              <div class="w-6 h-6 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-xs">3</div>
               <div class="flex-1">
-                <div class="font-bold text-slate-100">เตรียมกระเป๋าฉุกเฉินและยาประจำตัว</div>
-                <div class="text-[11px] text-slate-400">บัตรประชาชน, ยา 7 วัน, พาวเวอร์แบงก์ ใส่ถุงพลาสติกกันน้ำ</div>
+                <div class="font-bold text-slate-700">เตรียมกระเป๋าฉุกเฉินและยาสำคัญ</div>
+                <div class="text-[11px] text-slate-500">เอกสารสำคัญ, ยาประจำตัว, พาวเวอร์แบงก์ ใส่ถุงซิปล็อกกันน้ำ</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- 2 FAST ACTION BUTTONS -->
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="switchTab('sim')" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 active:scale-95 text-slate-950 font-extrabold text-xs py-3 px-2 rounded-xl shadow-md flex flex-col items-center justify-center gap-1 transition">
-            <i class="fa-solid fa-eye text-base"></i>
-            <span>ดูภาพจำลองหน้าบ้าน</span>
-            <span class="text-[10px] text-amber-950 font-normal">เห็นภาพก่อนน้ำมาถึง</span>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button onclick="switchTab('sim')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-1 transition">
+            <span class="text-xl">🏡</span>
+            <span>ดูแบบจำลองหน้าบ้าน</span>
+            <span class="text-[10px] text-amber-100 font-normal">เห็นภาพระดับน้ำชัดเจน</span>
           </button>
 
-          <button onclick="switchTab('gobag')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-100 font-bold text-xs py-3 px-2 rounded-xl border border-slate-700 flex flex-col items-center justify-center gap-1 transition">
-            <i class="fa-solid fa-briefcase text-base text-emerald-400"></i>
+          <button onclick="switchTab('gobag')" class="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-1 transition">
+            <span class="text-xl">🎒</span>
             <span>จัดกระเป๋าฉุกเฉิน</span>
-            <span class="text-[10px] text-slate-400 font-normal">เช็กลิสต์ของจำเป็น</span>
+            <span class="text-[10px] text-emerald-100 font-normal">เช็กลิสต์ของจำเป็น</span>
           </button>
         </div>
 
-        <!-- EXPANDABLE: ข้อมูลวิทยาศาสตร์เบื้องหลัง (ซ่อนไว้ให้ดูง่าย แต่กดเปิดดูเหตุผลได้) -->
-        <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden">
-          <button onclick="toggleScienceDetails()" class="w-full px-3 py-2 text-xs text-slate-400 hover:text-slate-200 flex justify-between items-center bg-slate-950/40">
+        <!-- EXPANDABLE: ทำไม AI ถึงเตือน -->
+        <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xs">
+          <button onclick="toggleScienceDetails()" class="w-full px-3.5 py-2.5 text-xs text-slate-500 hover:text-slate-700 flex justify-between items-center bg-slate-50/50">
             <span class="flex items-center gap-1.5 font-medium">
-              <i class="fa-solid fa-circle-info text-cyan-400"></i> ทำไม AI ถึงเตือนว่าบ้านคุณเสี่ยงสูง?
+              <i class="fa-solid fa-circle-info text-sky-500"></i> ทำไม AI ถึงเตือนว่าบ้านคุณเสี่ยง?
             </span>
-            <i class="fa-solid fa-chevron-down transition-transform" id="scienceArrow"></i>
+            <i class="fa-solid fa-chevron-down transition-transform text-slate-400 text-xs" id="scienceArrow"></i>
           </button>
 
-          <div id="scienceContent" class="p-3 bg-slate-950/80 text-xs space-y-2 hidden border-t border-slate-800">
-            <div class="flex items-center justify-between text-slate-300">
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-mountain text-cyan-400"></i> ความสูงจากระดับน้ำทะเล:</span>
-              <span class="font-bold text-white" id="liveElevation">กำลังคำนวณ...</span>
+          <div id="scienceContent" class="p-3 bg-white text-xs space-y-2 hidden border-t border-slate-100">
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-mountain text-slate-400"></i> ความสูงพื้นที่:</span>
+              <span class="font-bold text-slate-800" id="liveElevation">395 เมตร รทก.</span>
             </div>
-            <div class="flex items-center justify-between text-slate-300">
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-cyan-400"></i> ลักษณะกายภาพ:</span>
-              <span class="font-bold text-amber-300">เป็นแอ่งรับน้ำต่ำกว่าพื้นที่รอบข้าง</span>
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-water text-slate-400"></i> ระยะห่างลำน้ำ:</span>
+              <span class="font-bold text-amber-600">ห่างจากตลิ่งแม่น้ำ 180 เมตร</span>
             </div>
-            <div class="flex items-center justify-between text-slate-300">
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-satellite text-cyan-400"></i> ดาวเทียมเรดาร์ Sentinel-1:</span>
-              <span class="font-bold text-rose-400">ตรวจพบน้ำหลากในรัศมี 2 กม.</span>
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-satellite text-slate-400"></i> เรดาร์ดาวเทียม Sentinel-1:</span>
+              <span class="font-bold text-rose-500">ตรวจพบน้ำหลากในรัศมีใกล้เคียง</span>
             </div>
-            <div class="pt-1.5 border-t border-slate-800 text-[11px] text-slate-400 text-center font-mono">
-              แบบจำลอง: Calibrated Multi-Model Ensembles (CAE) + Spatial BlockCV
+            <div class="pt-1.5 border-t border-slate-100 text-[11px] text-slate-400 text-center font-mono">
+              โมเดล: Calibrated Multi-Model Ensembles (CAE)
             </div>
           </div>
         </div>
@@ -226,273 +242,328 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- TAB 2: โหมดจำลองภาพน้ำเสมือน (SIMULATION) -->
+      <!-- TAB 2: โหมดจำลองบ้านน่ารัก (CUTE COTTAGE SIM) -->
       <!-- ========================================== -->
       <section id="tab-sim" class="space-y-3 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg">
+        <div class="bg-white border border-slate-100 rounded-3xl p-3.5 shadow-sm">
           <div class="flex justify-between items-center">
             <div>
-              <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">โหมดจำลองภาพเสมือนจริง</span>
-              <h2 class="text-sm font-extrabold text-white mt-0.5">จำลองระดับน้ำหน้าบ้านคุณ</h2>
+              <span class="text-xs font-bold text-amber-500 uppercase tracking-wider">โหมดจำลองภาพเสมือนจริง</span>
+              <h2 class="text-sm font-extrabold text-slate-800 mt-0.5">จำลองระดับน้ำหน้าบ้านคุณ</h2>
             </div>
-            <span class="text-[11px] bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded-lg border border-indigo-800">Socio-Hydrology</span>
+            <span class="text-[11px] bg-sky-50 text-sky-600 px-2.5 py-1 rounded-full font-semibold border border-sky-100">
+              Cute Cottage 🏡
+            </span>
           </div>
-          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-            ทดลองเลื่อนปรับระดับน้ำด้านล่าง เพื่อดูผลกระทบต่อตัวบ้านและการตัดสินใจอพยพ
+          <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+            เลื่อนแถบเพื่อดูว่าถ้าน้ำขึ้นสูง บ้านน่ารักหลังนี้จะถูกน้ำท่วมอย่างไร และต้องรับมืออย่างไร
           </p>
 
-          <!-- Interactive 3D / Simulation Stage -->
-          <div class="relative w-full h-60 bg-slate-950 border border-slate-800 rounded-xl mt-3 overflow-hidden flex flex-col justify-end">
-            <div class="absolute inset-0 bg-gradient-to-b from-sky-950/60 to-slate-900 flex flex-col justify-between p-3 pointer-events-none">
-              <div class="flex justify-between items-start text-xs">
-                <span class="flex items-center gap-1 text-sky-400 font-medium">
-                  <i class="fa-solid fa-cloud-showers-heavy animate-bounce"></i> ฝนตกต่อเนื่องสะสม
+          <!-- Cute Cottage Simulation Canvas Stage -->
+          <div class="relative w-full h-64 bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 border border-slate-100 rounded-3xl mt-3 overflow-hidden flex flex-col justify-end shadow-inner">
+            
+            <!-- Sky Background with sun and clouds -->
+            <div class="absolute inset-0 p-3 pointer-events-none flex flex-col justify-between">
+              <div class="flex justify-between items-start text-xs z-0">
+                <span class="flex items-center gap-1 text-sky-600 font-medium bg-white/80 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-2xs">
+                  <span>🌧️</span> ฝนตกหนักสะสม
                 </span>
-                <span id="simDepthBadge" class="bg-sky-500/30 text-sky-200 border border-sky-400 px-2 py-0.5 rounded font-mono font-bold text-xs">
+                <span id="simDepthBadge" class="bg-white/90 text-sky-700 border border-sky-200 px-2.5 py-1 rounded-full font-mono font-bold text-xs shadow-2xs">
                   น้ำสูง: +0.50 เมตร
                 </span>
               </div>
 
-              <!-- Vector Graphic of House -->
-              <div class="flex justify-center items-end relative z-0 mb-6 opacity-90">
-                <div class="w-40 h-32 bg-amber-900/60 border-2 border-amber-600/70 rounded-t-lg relative flex flex-col items-center justify-end shadow-2xl">
-                  <!-- Roof -->
-                  <div class="absolute -top-8 w-48 border-l-[96px] border-l-transparent border-r-[96px] border-r-transparent border-b-[32px] border-b-rose-700"></div>
-                  <!-- Windows & Door -->
-                  <div class="flex gap-4 mb-4">
-                    <div class="w-7 h-7 bg-amber-300/40 border border-amber-400 rounded"></div>
-                    <div class="w-7 h-7 bg-amber-300/40 border border-amber-400 rounded"></div>
-                  </div>
-                  <div class="w-9 h-14 bg-amber-950 border border-amber-700 rounded-t"></div>
-                </div>
+              <!-- CUTE VECTOR COTTAGE SVG -->
+              <div class="flex justify-center items-end relative z-0 mb-4">
+                <svg viewBox="0 0 280 200" class="w-64 h-48 drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Cute Fluffy Clouds -->
+                  <path d="M 30 35 Q 40 20 55 25 Q 70 20 80 35 Q 90 45 80 55 Q 65 65 50 60 Q 30 65 25 50 Z" fill="#ffffff" opacity="0.8"/>
+                  <path d="M 210 25 Q 220 15 235 20 Q 248 15 255 28 Q 265 38 255 48 Q 240 55 230 50 Q 210 52 205 40 Z" fill="#ffffff" opacity="0.8"/>
+                  
+                  <!-- Chimney with Cute Puffy Smoke -->
+                  <rect x="180" y="42" width="18" height="32" rx="4" fill="#f87171" stroke="#ef4444" stroke-width="1.5"/>
+                  <circle cx="189" cy="30" r="6" fill="#e2e8f0" opacity="0.8"/>
+                  <circle cx="196" cy="18" r="9" fill="#cbd5e1" opacity="0.6"/>
+                  <circle cx="206" cy="8" r="12" fill="#cbd5e1" opacity="0.4"/>
+
+                  <!-- Cute Little Tree -->
+                  <rect x="38" y="115" width="10" height="45" rx="3" fill="#a16207"/>
+                  <circle cx="43" cy="110" r="26" fill="#4ade80"/>
+                  <circle cx="34" cy="98" r="18" fill="#22c55e"/>
+                  <circle cx="54" cy="102" r="16" fill="#86efac"/>
+                  <circle cx="43" cy="108" r="5" fill="#f43f5e"/>
+                  <circle cx="36" cy="118" r="4" fill="#fbbf24"/>
+
+                  <!-- Main Cottage Body (Warm Cream) -->
+                  <rect x="68" y="82" width="144" height="88" rx="14" fill="#fffbeb" stroke="#fef08a" stroke-width="3"/>
+
+                  <!-- Cozy Roof (Terracotta Orange-Red) -->
+                  <path d="M 52 88 L 140 28 L 228 88 Z" fill="#fb7185"/>
+                  <path d="M 62 86 L 140 33 L 218 86 Z" fill="#f43f5e"/>
+                  <path d="M 140 33 L 140 86" stroke="#fda4af" stroke-width="2" stroke-dasharray="3,3"/>
+
+                  <!-- Attic Round Window -->
+                  <circle cx="140" cy="62" r="12" fill="#fef9c3" stroke="#ffffff" stroke-width="2.5"/>
+                  <line x1="140" y1="50" x2="140" y2="74" stroke="#eab308" stroke-width="1.5"/>
+                  <line x1="128" y1="62" x2="152" y2="62" stroke="#eab308" stroke-width="1.5"/>
+
+                  <!-- Ground Window Left (Glowing Warm) -->
+                  <rect x="85" y="102" width="28" height="30" rx="6" fill="#fef08a" stroke="#ffffff" stroke-width="2"/>
+                  <line x1="99" y1="102" x2="99" y2="132" stroke="#f59e0b" stroke-width="1.5"/>
+                  <line x1="85" y1="117" x2="113" y2="117" stroke="#f59e0b" stroke-width="1.5"/>
+                  <!-- Flower planter under left window -->
+                  <rect x="82" y="132" width="34" height="6" rx="3" fill="#b45309"/>
+                  <circle cx="88" cy="131" r="3" fill="#f43f5e"/>
+                  <circle cx="99" cy="130" r="3" fill="#fbbf24"/>
+                  <circle cx="110" cy="131" r="3" fill="#a855f7"/>
+
+                  <!-- Cute Arched Doorway Right -->
+                  <path d="M 150 170 L 150 118 A 17 17 0 0 1 184 118 L 184 170 Z" fill="#d97706"/>
+                  <circle cx="156" cy="144" r="3" fill="#fef08a"/>
+                  <rect x="144" y="167" width="46" height="5" rx="2.5" fill="#e2e8f0"/>
+
+                  <!-- Cute Bush Right -->
+                  <circle cx="225" cy="162" r="16" fill="#4ade80"/>
+                  <circle cx="238" cy="165" r="12" fill="#22c55e"/>
+                  <circle cx="230" cy="156" r="4" fill="#fb7185"/>
+
+                  <!-- Ground Grass Path -->
+                  <rect x="0" y="170" width="280" height="30" fill="#86efac"/>
+                  <ellipse cx="167" cy="178" rx="20" ry="4" fill="#fde68a" opacity="0.6"/>
+                </svg>
               </div>
             </div>
 
-            <!-- Animated Water Surface -->
-            <div id="waterLevel" class="water-wave w-full relative z-10 h-[35%] flex items-start justify-center border-t-2 border-cyan-300/80 shadow-[0_-8px_20px_rgba(56,189,248,0.4)]">
-              <span id="waterText" class="text-xs font-black text-cyan-100 bg-sky-950/85 px-3 py-0.5 rounded-full border border-cyan-400/50 mt-2 shadow">
+            <!-- Animated Cute Water Layer with Floating Rubber Duck -->
+            <div id="waterLevel" class="water-wave-cute w-full relative z-10 h-[35%] flex items-start justify-center border-t-3 border-white/80 shadow-[0_-6px_16px_rgba(14,165,233,0.3)]">
+              
+              <!-- Cute Floating Duck -->
+              <div class="absolute -top-5 left-10 text-2xl floating-duck select-none filter drop-shadow">
+                🐤
+              </div>
+
+              <span id="waterText" class="text-xs font-bold text-sky-900 bg-white/95 px-3 py-1 rounded-full border border-sky-200 mt-2 shadow-sm flex items-center gap-1.5">
                 🌊 ระดับน้ำสูงถึงขอบบันไดบ้าน (0.5 ม.)
               </span>
             </div>
           </div>
 
-          <!-- Slider Controls -->
-          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <!-- Slider Controls (Cute Minimalist) -->
+          <div class="mt-3.5 bg-slate-50 border border-slate-100 rounded-2xl p-3">
             <div class="flex justify-between items-center text-xs">
-              <span class="font-bold text-slate-300">เลื่อนปรับระดับน้ำจำลอง:</span>
-              <span id="sliderValDisplay" class="font-mono text-cyan-400 font-bold">0.50 เมตร</span>
+              <span class="font-bold text-slate-700 flex items-center gap-1">
+                <span>🎚️</span> เลื่อนปรับระดับน้ำจำลอง:
+              </span>
+              <span id="sliderValDisplay" class="font-mono text-sky-600 font-bold bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                0.50 เมตร
+              </span>
             </div>
+            
             <input type="range" id="waterSlider" min="0" max="2.0" step="0.25" value="0.5" 
                    oninput="updateWaterSim(this.value)"
-                   class="w-full accent-cyan-400 mt-2 cursor-pointer h-2 bg-slate-800 rounded-lg">
+                   class="w-full accent-sky-500 mt-2.5 cursor-pointer h-2 bg-slate-200 rounded-lg">
 
-            <div class="flex justify-between text-[11px] text-slate-400 mt-1 font-mono">
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1.5 font-medium">
               <span>0.0 ม. (ปกติ)</span>
               <span>0.5 ม. (เข่า)</span>
               <span>1.0 ม. (เอว)</span>
-              <span>2.0 ม. (มิดชั้น 1)</span>
+              <span>2.0 ม. (มิดหลังคา)</span>
             </div>
           </div>
 
-          <!-- Behavioral Impact Advice -->
-          <div id="simAdviceCard" class="mt-2.5 p-3 rounded-xl bg-amber-950/40 border border-amber-700/60 text-xs">
-            <div class="font-bold text-amber-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-person-walking-arrow-right"></i> คำแนะนำความปลอดภัย:
+          <!-- Behavioral Advice Box -->
+          <div id="simAdviceCard" class="mt-2.5 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs">
+            <div class="font-bold text-amber-800 flex items-center gap-1.5">
+              <span>💡</span> คำแนะนำสำหรับระดับน้ำนี้:
             </div>
-            <div id="simAdviceText" class="text-slate-300 mt-1 leading-relaxed">
-              น้ำสูง 0.5 เมตร รถเก๋งไม่สามารถสัญจรได้ ควรตัดไฟชั้นล่าง ยกเครื่องใช้ไฟฟ้าขึ้นที่สูง และจัดกระเป๋าฉุกเฉินทันที
+            <div id="simAdviceText" class="text-slate-600 mt-1 leading-relaxed">
+              น้ำสูง 0.5 เมตร รถเก๋งไม่สามารถสัญจรได้ ควรตัดไฟชั้นล่าง ยกเครื่องใช้ไฟฟ้าขึ้นชั้น 2 และเตรียมกระเป๋าฉุกเฉินทันที
             </div>
           </div>
         </div>
       </section>
 
       <!-- ========================================== -->
-      <!-- TAB 3: กระเป๋าฉุกเฉิน (SMART GO-BAG) -->
+      <!-- TAB 3: กระเป๋าฉุกเฉิน (CUTE GO-BAG) -->
       <!-- ========================================== -->
       <section id="tab-gobag" class="space-y-3 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg">
+        <div class="bg-white border border-slate-100 rounded-3xl p-3.5 shadow-sm">
           <div class="flex justify-between items-start">
             <div>
-              <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">กระเป๋าฉุกเฉินยังชีพ</span>
-              <h2 class="text-sm font-extrabold text-white mt-0.5">ของจำเป็นเอาชีวิตรอด 72 ชม.</h2>
+              <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">กระเป๋าฉุกเฉินยังชีพ</span>
+              <h2 class="text-sm font-extrabold text-slate-800 mt-0.5">ของจำเป็น 72 ชั่วโมง 🎒</h2>
             </div>
-            <span id="bagProgressBadge" class="bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
-              พร้อม 0/6 รายการ
+            <span id="bagProgressBadge" class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2.5 py-1 rounded-full font-bold">
+              พร้อม 2/6 รายการ
             </span>
           </div>
 
-          <div class="mt-3 bg-slate-950 border border-slate-800 rounded-xl p-2.5">
-            <span class="text-xs text-slate-400 block mb-1.5 font-medium">สมาชิกในบ้านมีใครบ้าง (กดเพื่อปรับของจำเป็น):</span>
+          <!-- Family Filter Toggles -->
+          <div class="mt-3 bg-slate-50 border border-slate-100 rounded-2xl p-2.5">
+            <span class="text-xs text-slate-500 block mb-1.5 font-medium">สมาชิกในบ้านมีใครบ้าง (กดเพื่อปรับของ):</span>
             <div class="flex gap-1.5">
-              <button onclick="toggleFilter(this, 'elderly')" class="filter-btn text-xs px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1 active:scale-95 transition">
-                <i class="fa-solid fa-person-cane text-amber-400"></i> ผู้สูงอายุ
+              <button onclick="toggleFilter(this)" class="filter-btn text-xs px-2.5 py-1 rounded-xl border border-slate-200 bg-white text-slate-600 flex items-center gap-1 active:scale-95 transition shadow-2xs">
+                👴 ผู้สูงอายุ
               </button>
-              <button onclick="toggleFilter(this, 'baby')" class="filter-btn text-xs px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1 active:scale-95 transition">
-                <i class="fa-solid fa-baby text-cyan-400"></i> เด็กทารก
+              <button onclick="toggleFilter(this)" class="filter-btn text-xs px-2.5 py-1 rounded-xl border border-slate-200 bg-white text-slate-600 flex items-center gap-1 active:scale-95 transition shadow-2xs">
+                👶 เด็กทารก
               </button>
-              <button onclick="toggleFilter(this, 'pet')" class="filter-btn text-xs px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1 active:scale-95 transition">
-                <i class="fa-solid fa-paw text-emerald-400"></i> สัตว์เลี้ยง
+              <button onclick="toggleFilter(this)" class="filter-btn text-xs px-2.5 py-1 rounded-xl border border-slate-200 bg-white text-slate-600 flex items-center gap-1 active:scale-95 transition shadow-2xs">
+                🐱 สัตว์เลี้ยง
               </button>
             </div>
           </div>
 
-          <!-- Dynamic Checklist Items (Saved in localStorage) -->
+          <!-- Checklist Items (Saved in localStorage) -->
           <div class="mt-3 space-y-2 text-xs" id="checklistContainer">
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
-                <input type="checkbox" id="item1" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">น้ำดื่มสะอาด (3 ลิตร/คน) & อาหารแห้ง/ปลากระป๋อง</span>
+                <input type="checkbox" id="item1" checked onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                <span class="text-slate-700">น้ำดื่มสะอาด (3 ลิตร/คน) & อาหารแห้ง</span>
               </span>
-              <span class="text-[11px] text-emerald-400 font-semibold shrink-0">จำเป็น</span>
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg font-medium shrink-0">จำเป็น</span>
             </label>
 
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
-                <input type="checkbox" id="item2" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">บัตรประชาชน โฉนด สมุดบัญชี (ใส่ถุงซิปล็อกกันน้ำ)</span>
+                <input type="checkbox" id="item2" checked onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                <span class="text-slate-700">บัตร ปชช. โฉนด สมุดบัญชี (ถุงซิปล็อกกันน้ำ)</span>
               </span>
-              <span class="text-[11px] text-emerald-400 font-semibold shrink-0">จำเป็น</span>
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg font-medium shrink-0">จำเป็น</span>
             </label>
 
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
                 <input type="checkbox" id="item3" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">ยารักษาโรคประจำตัว & ชุดทำแผลฉุกเฉิน 7 วัน</span>
+                <span class="text-slate-700">ยารักษาโรคประจำตัว & ชุดทำแผลฉุกเฉิน 7 วัน</span>
               </span>
-              <span class="text-[11px] text-amber-400 font-semibold shrink-0">สุขภาพ</span>
+              <span class="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg font-medium shrink-0">สุขภาพ</span>
             </label>
 
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
                 <input type="checkbox" id="item4" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">พาวเวอร์แบงก์ชาร์จเต็ม สายชาร์จ & ไฟฉายกันน้ำ</span>
+                <span class="text-slate-700">พาวเวอร์แบงก์ชาร์จเต็ม & ไฟฉายกันน้ำ</span>
               </span>
-              <span class="text-[11px] text-sky-400 font-semibold shrink-0">สื่อสาร</span>
+              <span class="text-[11px] text-sky-700 bg-sky-50 px-2 py-0.5 rounded-lg font-medium shrink-0">สื่อสาร</span>
             </label>
 
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
                 <input type="checkbox" id="item5" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">นกหวีดเป่าขอความช่วยเหลือ เสื้อกันฝน</span>
+                <span class="text-slate-700">นกหวีดเป่าขอความช่วยเหลือ เสื้อกันฝน</span>
               </span>
-              <span class="text-[11px] text-emerald-400 font-semibold shrink-0">จำเป็น</span>
+              <span class="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg font-medium shrink-0">จำเป็น</span>
             </label>
 
-            <label class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/80 cursor-pointer hover:bg-slate-800 transition">
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-2xl border border-slate-100 cursor-pointer hover:bg-slate-100/80 transition">
               <span class="flex items-center gap-2.5">
                 <input type="checkbox" id="item6" onchange="saveChecklist()" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-                <span class="text-slate-200">เสื้อชูชีพ หรือแกลลอนน้ำผูกเชือกสำหรับลอยตัว</span>
+                <span class="text-slate-700">เสื้อชูชีพ หรือแกลลอนน้ำผูกเชือก</span>
               </span>
-              <span class="text-[11px] text-rose-400 font-semibold shrink-0">ชูชีพ</span>
+              <span class="text-[11px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg font-medium shrink-0">ชูชีพ</span>
             </label>
           </div>
 
-          <div class="mt-3 p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl flex items-center justify-between text-xs">
-            <span class="text-emerald-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-heart-pulse"></i> ความพร้อมในการรับมือ (P_Action):
+          <div class="mt-3 p-2.5 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs">
+            <span class="text-emerald-800 flex items-center gap-1.5 font-medium">
+              <span>❤️</span> ความพร้อมในการรับมือ (P_Action):
             </span>
-            <span id="pActionScore" class="font-bold text-emerald-400 font-mono text-sm">พร้อม 0%</span>
+            <span id="pActionScore" class="font-bold text-emerald-600 font-mono text-sm">พร้อม 33%</span>
           </div>
         </div>
       </section>
 
       <!-- ========================================== -->
-      <!-- TAB 4: ขอความช่วยเหลือ & อพยพ (SOS & MAP) -->
+      <!-- TAB 4: ขอความช่วยเหลือ (CUTE SOS & MAP) -->
       <!-- ========================================== -->
       <section id="tab-sos" class="space-y-3 hidden">
-        
-        <!-- Emergency SOS Actions -->
-        <div class="bg-gradient-to-b from-rose-950/90 to-slate-900 border-2 border-rose-600 rounded-2xl p-4 shadow-xl text-center">
-          <div class="inline-flex p-3 rounded-full bg-rose-600/30 border border-rose-500 text-rose-400 mb-2">
-            <i class="fa-solid fa-tower-broadcast text-2xl animate-pulse"></i>
+        <div class="bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-200 rounded-3xl p-4 shadow-sm text-center">
+          <div class="w-12 h-12 mx-auto rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl mb-2">
+            🆘
           </div>
-          <h2 class="text-base font-black text-white">ศูนย์แจ้งเหตุและขอความช่วยเหลือฉุกเฉิน</h2>
-          <p class="text-xs text-rose-200 mt-1">กดปุ่มเพื่อติดต่อสายด่วน หรือส่งพิกัดบ้านไปยัง LINE กู้ภัย</p>
+          <h2 class="text-base font-extrabold text-slate-800">ศูนย์ประสานงานกู้ภัยฉุกเฉิน</h2>
+          <p class="text-xs text-slate-500 mt-1">กดโทรสายด่วน หรือส่งพิกัดบ้านไปยัง LINE ครอบครัวและกู้ภัย</p>
 
-          <div class="grid grid-cols-2 gap-2 mt-3.5">
-            <!-- Call 1784 DDPM -->
-            <a href="tel:1784" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-xl shadow-lg shadow-rose-600/50 flex flex-col items-center justify-center gap-1 transition">
-              <i class="fa-solid fa-phone text-lg"></i>
+          <div class="grid grid-cols-2 gap-2.5 mt-3.5">
+            <a href="tel:1784" class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-phone text-base"></i>
               <span>โทรสายด่วน 1784</span>
-              <span class="text-[10px] text-rose-200 font-normal">กรมป้องกันฯ (ฟรี 24 ชม.)</span>
+              <span class="text-[10px] text-rose-100 font-normal">ปภ. ฟรี 24 ชม.</span>
             </a>
 
-            <!-- Share to LINE with GPS coordinates -->
-            <button onclick="shareToLine()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-xl shadow-lg shadow-emerald-600/50 flex flex-col items-center justify-center gap-1 transition">
+            <button onclick="shareToLine()" class="bg-[#06c755] hover:bg-[#05b34c] active:scale-95 text-white font-bold text-xs py-3 px-2 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-1 transition">
               <i class="fa-brands fa-line text-xl"></i>
               <span>แชร์พิกัดเข้า LINE</span>
-              <span class="text-[10px] text-emerald-200 font-normal">ส่งหาครอบครัว/กู้ภัย</span>
+              <span class="text-[10px] text-emerald-100 font-normal">ส่งหาครอบครัว/กู้ภัย</span>
             </button>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <button onclick="reportSpecialNeed('bedridden')" class="bg-slate-800 hover:bg-slate-700 border border-rose-500/50 text-white font-medium text-xs py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-bed-pulse text-rose-400"></i> แจ้งมีผู้ป่วยติดเตียง
+          <div class="grid grid-cols-2 gap-2 mt-2.5">
+            <button onclick="reportSpecialNeed('bedridden')" class="bg-white hover:bg-slate-50 border border-rose-200 text-slate-700 font-medium text-xs py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs">
+              <span>🛏️</span> มีผู้ป่วยติดเตียง
             </button>
-            <button onclick="reportSpecialNeed('safe')" class="bg-slate-800 hover:bg-slate-700 border border-emerald-500/50 text-white font-medium text-xs py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-circle-check text-emerald-400"></i> ฉันปลอดภัยแล้ว
+            <button onclick="reportSpecialNeed('safe')" class="bg-white hover:bg-slate-50 border border-emerald-200 text-slate-700 font-medium text-xs py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 transition shadow-2xs">
+              <span>✅</span> ฉันปลอดภัยแล้ว
             </button>
           </div>
         </div>
 
-        <!-- Real OpenStreetMap Interactive Leaflet Map -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-lg">
+        <!-- Safe Map Card -->
+        <div class="bg-white border border-slate-100 rounded-3xl p-3.5 shadow-sm">
           <div class="flex justify-between items-center text-xs mb-2">
-            <span class="font-bold text-sky-400 flex items-center gap-1.5">
-              <i class="fa-solid fa-map-location-dot"></i> แผนที่เส้นทางหนีน้ำปลอดภัย
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>🗺️</span> แผนที่เส้นทางหนีน้ำปลอดภัย
             </span>
-            <span class="text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 text-[11px] font-semibold">
+            <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 text-[11px] font-semibold">
               เลี่ยงทางน้ำท่วม
             </span>
           </div>
 
-          <!-- Leaflet Container -->
-          <div class="w-full h-52 bg-slate-950 border border-slate-800 rounded-xl relative overflow-hidden">
+          <div class="w-full h-52 bg-slate-100 rounded-2xl relative overflow-hidden border border-slate-100">
             <div id="map"></div>
           </div>
 
-          <div class="mt-2.5 p-2 bg-slate-950 border border-slate-800 rounded-xl text-xs flex items-center justify-between">
-            <span class="text-slate-300">
-              <i class="fa-solid fa-person-walking text-sky-400"></i> จุดพักพิงใกล้คุณ: <b>โรงเรียนเทศบาล (1.2 กม.)</b>
+          <div class="mt-2.5 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs flex items-center justify-between">
+            <span class="text-slate-600">
+              จุดพักพิงใกล้คุณ: <b>โรงเรียนเทศบาล 1 (1.2 กม.)</b>
             </span>
-            <button onclick="openGoogleNavigation()" class="text-cyan-400 hover:text-cyan-300 font-bold text-[11px] flex items-center gap-1">
-              เปิด Google Maps <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <button onclick="openGoogleNavigation()" class="text-sky-600 hover:text-sky-700 font-bold text-[11px] flex items-center gap-1">
+              เปิด Google Maps <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
             </button>
           </div>
         </div>
-
       </section>
 
     </main>
 
-    <!-- Bottom Navigation Bar (App Tabs) -->
-    <nav class="absolute bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-2 py-2 flex justify-around items-center z-30 shrink-0">
-      <button onclick="switchTab('risk')" id="btn-risk" class="nav-btn flex flex-col items-center text-cyan-400 transition">
-        <i class="fa-solid fa-house-signal text-lg"></i>
-        <span class="text-[11px] font-semibold mt-0.5">สถานะบ้านฉัน</span>
+    <!-- Bottom Navigation Bar (Minimal Clean White Pill Nav) -->
+    <nav class="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-3 py-2.5 flex justify-around items-center z-30 shrink-0">
+      <button onclick="switchTab('risk')" id="btn-risk" class="nav-btn flex flex-col items-center text-sky-600 transition">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[11px] font-semibold mt-0.5">บ้านฉัน</span>
       </button>
 
-      <button onclick="switchTab('sim')" id="btn-sim" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+      <button onclick="switchTab('sim')" id="btn-sim" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
         <i class="fa-solid fa-water text-lg"></i>
-        <span class="text-[11px] font-medium mt-0.5">จำลองน้ำท่วม</span>
+        <span class="text-[11px] font-medium mt-0.5">จำลองน้ำ</span>
       </button>
 
-      <button onclick="switchTab('gobag')" id="btn-gobag" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+      <button onclick="switchTab('gobag')" id="btn-gobag" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
         <i class="fa-solid fa-briefcase text-lg"></i>
-        <span class="text-[11px] font-medium mt-0.5">กระเป๋าฉุกเฉิน</span>
+        <span class="text-[11px] font-medium mt-0.5">กระเป๋า</span>
       </button>
 
-      <button onclick="switchTab('sos')" id="btn-sos" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
-        <i class="fa-solid fa-hand-holding-heart text-lg"></i>
-        <span class="text-[11px] font-medium mt-0.5">ขอความช่วยเหลือ</span>
+      <button onclick="switchTab('sos')" id="btn-sos" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-heart-pulse text-lg"></i>
+        <span class="text-[11px] font-medium mt-0.5">กู้ภัย SOS</span>
       </button>
     </nav>
 
   </div>
 
-  <!-- Application Logic & Live Real-Time Integration -->
+  <!-- Application Logic & Real-Time Weather Integration -->
   <script>
-    // Global App State
     let currentLat = 19.9105;
     let currentLon = 99.8406;
     let currentAddressStr = "ริมแม่น้ำกก ชุมชนร่องเสือเต้น อ.เมือง จ.เชียงราย";
@@ -501,13 +572,10 @@
     let shelterMarker = null;
     let floodCircle = null;
 
-    // Initialize App on Load
     window.addEventListener('DOMContentLoaded', () => {
       updateClock();
       setInterval(updateClock, 1000);
       loadChecklist();
-      
-      // Auto-request real live geolocation
       getLiveLocation();
     });
 
@@ -516,26 +584,24 @@
       document.getElementById('liveClock').innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Switch Screens
     function switchTab(tabId) {
       ['risk', 'sim', 'gobag', 'sos'].forEach(t => {
         document.getElementById('tab-' + t).classList.add('hidden');
         const btn = document.getElementById('btn-' + t);
-        btn.classList.remove('text-cyan-400');
+        btn.classList.remove('text-sky-600');
         btn.classList.add('text-slate-400');
       });
 
       document.getElementById('tab-' + tabId).classList.remove('hidden');
       const activeBtn = document.getElementById('btn-' + tabId);
       activeBtn.classList.remove('text-slate-400');
-      activeBtn.classList.add('text-cyan-400');
+      activeBtn.classList.add('text-sky-600');
 
       if (tabId === 'sos') {
         setTimeout(initLeafletMap, 150);
       }
     }
 
-    // 1. REAL LIVE GEOLOCATION (HTML5 API)
     function getLiveLocation() {
       const spin = document.getElementById('gpsSpin');
       spin.classList.add('animate-spin');
@@ -548,19 +614,14 @@
             spin.classList.remove('animate-spin');
             currentLat = pos.coords.latitude;
             currentLon = pos.coords.longitude;
-            badge.innerHTML = '<i class="fa-solid fa-satellite-dish text-emerald-400"></i> GPS แม่นยำ';
+            badge.innerHTML = '<i class="fa-solid fa-satellite text-teal-600"></i> GPS แม่นยำ';
             document.getElementById('userCoords').innerText = `Lat: ${currentLat.toFixed(4)}, Lon: ${currentLon.toFixed(4)}`;
-            
-            // Reverse Geocode with OpenStreetMap Nominatim
             reverseGeocode(currentLat, currentLon);
-            // Fetch Real Weather and Elevation from Open-Meteo
             fetchLiveWeatherData(currentLat, currentLon);
           },
           (err) => {
             spin.classList.remove('animate-spin');
-            badge.innerHTML = '<i class="fa-solid fa-circle-exclamation text-amber-400"></i> ใช้พิกัดตัวอย่าง';
-            console.warn('Geolocation denied/error:', err.message);
-            // Fallback default
+            badge.innerHTML = '<i class="fa-solid fa-circle-info text-amber-500"></i> พิกัดตัวอย่าง';
             setCustomLocation(currentLat, currentLon, currentAddressStr);
           },
           { timeout: 10000, enableHighAccuracy: true }
@@ -571,7 +632,6 @@
       }
     }
 
-    // Reverse Geocoding
     function reverseGeocode(lat, lon) {
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`)
         .then(res => res.json())
@@ -588,10 +648,8 @@
         });
     }
 
-    // 2. FETCH REAL LIVE WEATHER & FLOOD RISK (Open-Meteo API)
     function fetchLiveWeatherData(lat, lon) {
-      document.getElementById('liveRainMM').innerText = 'กำลังดึงข้อมูลเรดาร์...';
-      
+      document.getElementById('liveRainMM').innerText = 'กำลังโหลด...';
       const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=precipitation,rain,weather_code&hourly=precipitation&elevation=nan&timezone=auto`;
 
       fetch(apiUrl)
@@ -603,18 +661,14 @@
           
           let hourlyRainSum = 0;
           if (data.hourly && data.hourly.precipitation) {
-            // sum first 6 hours
             hourlyRainSum = data.hourly.precipitation.slice(0, 6).reduce((a, b) => a + b, 0);
           }
           
           let displayRain = (currentRain + hourlyRainSum).toFixed(1);
           document.getElementById('liveRainMM').innerText = `${displayRain} มม./24 ชม.`;
-
-          // Dynamic Risk Adaptation based on real rain
           updateRiskUI(parseFloat(displayRain), elev);
         })
-        .catch(err => {
-          console.error(err);
+        .catch(() => {
           document.getElementById('liveRainMM').innerText = '42.5 มม./24 ชม.';
           document.getElementById('liveElevation').innerText = '395 เมตร รทก.';
           updateRiskUI(45, 395);
@@ -628,25 +682,22 @@
       const depthDesc = document.getElementById('depthHumanDesc');
 
       if (rainMM > 35) {
-        // Red Alert
-        card.className = "bg-gradient-to-b from-rose-950/80 via-rose-900/30 to-slate-900 border-2 border-rose-500/90 rounded-2xl p-4 shadow-xl text-center relative overflow-hidden transition-colors duration-500";
-        badge.className = "inline-flex items-center gap-1.5 bg-rose-600 text-white font-extrabold text-xs px-3.5 py-1 rounded-full shadow-md animate-bounce mb-2";
-        badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> เสี่ยงน้ำท่วมสูงมากใน 6-12 ชม. นี้';
-        depthText.innerHTML = '40 - 60 <span class="text-sm font-bold text-rose-300">ซม.</span>';
-        depthDesc.innerHTML = '<i class="fa-solid fa-person-arrow-up-from-line"></i> สูงระดับหัวเข่า (รถเล็กผ่านไม่ได้)';
+        card.className = "bg-gradient-to-br from-rose-50 via-red-50 to-amber-50 border-2 border-rose-200/90 rounded-3xl p-4 shadow-sm text-center relative overflow-hidden transition-all duration-500";
+        badge.className = "inline-flex items-center gap-1.5 bg-rose-500 text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm animate-bounce mb-2";
+        badge.innerHTML = '<i class="fa-solid fa-cloud-showers-water text-xs"></i> เสี่ยงน้ำท่วมสูงใน 6-12 ชม. นี้';
+        depthText.innerHTML = '40 - 60 <span class="text-sm font-bold text-slate-600">ซม.</span>';
+        depthDesc.innerHTML = '<i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> สูงระดับหัวเข่า (รถเล็กควรเลี่ยง)';
       } else if (rainMM > 15) {
-        // Yellow Alert
-        card.className = "bg-gradient-to-b from-amber-950/80 via-amber-900/30 to-slate-900 border-2 border-amber-500/90 rounded-2xl p-4 shadow-xl text-center relative overflow-hidden transition-colors duration-500";
-        badge.className = "inline-flex items-center gap-1.5 bg-amber-600 text-slate-950 font-extrabold text-xs px-3.5 py-1 rounded-full shadow-md mb-2";
-        badge.innerHTML = '<i class="fa-solid fa-bell"></i> เฝ้าระวังน้ำหลากเข้าพื้นที่';
-        depthText.innerHTML = '15 - 25 <span class="text-sm font-bold text-amber-300">ซม.</span>';
-        depthDesc.innerHTML = '<i class="fa-solid fa-car-side"></i> เริ่มท่วมขังผิวถนน รถเก๋งวิ่งช้าๆ ได้';
+        card.className = "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-200/90 rounded-3xl p-4 shadow-sm text-center relative overflow-hidden transition-all duration-500";
+        badge.className = "inline-flex items-center gap-1.5 bg-amber-500 text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm mb-2";
+        badge.innerHTML = '<i class="fa-solid fa-bell text-xs"></i> เฝ้าระวังน้ำท่วมขังผิวถนน';
+        depthText.innerHTML = '15 - 25 <span class="text-sm font-bold text-slate-600">ซม.</span>';
+        depthDesc.innerHTML = '<i class="fa-solid fa-car-side"></i> รถเก๋งสัญจรช้าๆ ระมัดระวัง';
       } else {
-        // Green Safe
-        card.className = "bg-gradient-to-b from-emerald-950/80 via-emerald-900/30 to-slate-900 border-2 border-emerald-500/90 rounded-2xl p-4 shadow-xl text-center relative overflow-hidden transition-colors duration-500";
-        badge.className = "inline-flex items-center gap-1.5 bg-emerald-600 text-white font-extrabold text-xs px-3.5 py-1 rounded-full shadow-md mb-2";
-        badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> สถานะปกติ ไม่พบความเสี่ยงน้ำท่วม';
-        depthText.innerHTML = '0 <span class="text-sm font-bold text-emerald-300">ซม.</span>';
+        card.className = "bg-gradient-to-br from-emerald-50 via-teal-50 to-sky-50 border-2 border-emerald-200/90 rounded-3xl p-4 shadow-sm text-center relative overflow-hidden transition-all duration-500";
+        badge.className = "inline-flex items-center gap-1.5 bg-emerald-500 text-white font-bold text-xs px-3.5 py-1 rounded-full shadow-sm mb-2";
+        badge.innerHTML = '<i class="fa-solid fa-circle-check text-xs"></i> สถานะปกติ ปลอดภัย';
+        depthText.innerHTML = '0 <span class="text-sm font-bold text-slate-600">ซม.</span>';
         depthDesc.innerHTML = '<i class="fa-solid fa-road"></i> ผิวถนนแห้ง สัญจรได้ปลอดภัย';
       }
     }
@@ -658,12 +709,9 @@
       document.getElementById('userAddress').innerText = currentAddressStr;
       document.getElementById('userCoords').innerText = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
       fetchLiveWeatherData(lat, lon);
-      if (mapInstance) {
-        updateMapPosition();
-      }
+      if (mapInstance) updateMapPosition();
     }
 
-    // Toggle Science Details Accordion
     function toggleScienceDetails() {
       const content = document.getElementById('scienceContent');
       const arrow = document.getElementById('scienceArrow');
@@ -671,46 +719,44 @@
       arrow.classList.toggle('rotate-180');
     }
 
-    // 3. INTERACTIVE SIMULATION ENGINE
     function updateWaterSim(depth) {
       document.getElementById('sliderValDisplay').innerText = parseFloat(depth).toFixed(2) + ' เมตร';
       document.getElementById('simDepthBadge').innerText = 'น้ำสูง: +' + parseFloat(depth).toFixed(2) + ' เมตร';
 
-      let heightPercent = Math.min(85, Math.max(10, depth * 38 + 12));
+      let heightPercent = Math.min(85, Math.max(10, depth * 38 + 10));
       document.getElementById('waterLevel').style.height = heightPercent + '%';
 
       const adviceText = document.getElementById('simAdviceText');
       const waterText = document.getElementById('waterText');
 
       if (depth == 0) {
-        waterText.innerText = '☀️ พื้นถนนแห้ง สัญจรได้ปกติ';
-        adviceText.innerText = 'สถานะปลอดภัย ตรวจสอบการพยากรณ์อากาศสม่ำเสมอ';
+        waterText.innerText = '☀️ พื้นถนนแห้ง สัญจรได้ตามปกติ';
+        adviceText.innerText = 'สถานะปลอดภัย อากาศแจ่มใส ตรวจสอบการพยากรณ์อย่างสม่ำเสมอ';
       } else if (depth <= 0.5) {
         waterText.innerText = '🌊 ระดับน้ำสูงถึงขอบบันไดบ้าน (0.5 ม.)';
-        adviceText.innerText = 'น้ำสูง 0.5 ม. รถเก๋งสัญจรไม่ได้ ควรตัดสะพานไฟชั้นล่าง ยกของขึ้นชั้น 2 และเตรียมกระเป๋าฉุกเฉิน';
+        adviceText.innerText = 'น้ำสูง 0.5 ม. รถเล็กสัญจรไม่ได้ ควรตัดไฟชั้นล่าง ยกของขึ้นชั้น 2 และเตรียมกระเป๋าฉุกเฉิน';
       } else if (depth <= 1.0) {
-        waterText.innerText = '⚠️ น้ำท่วมสูงระดับเอว (กระแสน้ำเชี่ยว)';
-        adviceText.innerText = 'อันตรายสูง! ห้ามเดินลุยน้ำเนื่องจากเสี่ยงไฟฟ้ารั่วและฝาท่อเปิด ควรเริ่มอพยพเด็กและคนชราทันที';
+        waterText.innerText = '⚠️ น้ำท่วมสูงระดับเอว (กระแสน้ำไหลแรง)';
+        adviceText.innerText = 'อันตรายสูง! ห้ามเดินลุยน้ำเนื่องจากเสี่ยงไฟฟ้ารั่ว ควรเริ่มอพยพเด็ก ผู้สูงอายุ และสัตว์เลี้ยง';
       } else {
         waterText.innerText = '🚨 วิกฤต! น้ำท่วมมิดชั้น 1';
         adviceText.innerText = 'ระดับวิกฤตสูงสุด! ต้องอพยพขึ้นชั้น 2 หรือดาดฟ้า โบกธง/ส่งสัญญาณ SOS รอความช่วยเหลือทางเรือเท่านั้น';
       }
     }
 
-    // 4. CHECKLIST & LOCAL STORAGE PERSISTENCE
     function saveChecklist() {
       const checks = {};
       for (let i = 1; i <= 6; i++) {
         const el = document.getElementById('item' + i);
         if (el) checks['item' + i] = el.checked;
       }
-      localStorage.setItem('floodsafe_gobag', JSON.stringify(checks));
+      localStorage.setItem('floodsafe_gobag_cute', JSON.stringify(checks));
       calcChecklistProgress();
     }
 
     function loadChecklist() {
       try {
-        const saved = JSON.parse(localStorage.getItem('floodsafe_gobag'));
+        const saved = JSON.parse(localStorage.getItem('floodsafe_gobag_cute'));
         if (saved) {
           for (let key in saved) {
             const el = document.getElementById(key);
@@ -726,72 +772,60 @@
       let checkedCount = 0;
       boxes.forEach(b => { if (b.checked) checkedCount++; });
       document.getElementById('bagProgressBadge').innerText = `พร้อม ${checkedCount}/${boxes.length} รายการ`;
-      
       let pct = Math.round((checkedCount / boxes.length) * 100);
       document.getElementById('pActionScore').innerText = `พร้อม ${pct}% ${pct > 65 ? '(ความพร้อมสูง)' : '(ควรจัดเพิ่ม)'}`;
     }
 
-    function toggleFilter(btn, type) {
-      btn.classList.toggle('bg-slate-800');
-      btn.classList.toggle('bg-sky-600');
+    function toggleFilter(btn) {
+      btn.classList.toggle('bg-white');
+      btn.classList.toggle('bg-sky-500');
       btn.classList.toggle('text-white');
+      btn.classList.toggle('text-slate-600');
     }
 
-    // 5. SOS ACTION & REAL LINE SHARE
     function shareToLine() {
-      const message = `🚨 ขอความช่วยเหลือด่วน! บ้านฉันอยู่ในพื้นที่เสี่ยงน้ำท่วมสูง\n📍 ตำแหน่ง: ${currentAddressStr}\n🗺️ พิกัด GPS: https://maps.google.com/?q=${currentLat},${currentLon}\n(ส่งผ่านแอป FloodSafe Life)`;
+      const message = `🚨 ขอความช่วยเหลือด่วน! บ้านฉันอยู่ในพื้นที่เสี่ยงน้ำท่วม\n📍 ตำแหน่ง: ${currentAddressStr}\n🗺️ พิกัด GPS: https://maps.google.com/?q=${currentLat},${currentLon}\n(ส่งผ่านแอป FloodSafe Life)`;
       const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(message)}`;
       window.open(lineUrl, '_blank');
     }
 
     function reportSpecialNeed(type) {
       if (type === 'bedridden') {
-        alert(`🚨 บันทึกเหตุฉุกเฉินแล้ว!\n\nระบบบันทึกสถานะ: "มีผู้ป่วยติดเตียงต้องการความช่วยเหลือ"\nพิกัด GPS: ${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}\n\nแนะนำให้กดปุ่ม "โทรสายด่วน 1784" เพิ่มเติมเพื่อแจ้งจำนวนผู้ป่วยให้เจ้าหน้าที่ทราบทันทีครับ`);
+        alert(`🚨 บันทึกเหตุฉุกเฉินเรียบร้อย!\n\nระบบบันทึกสถานะ: "มีผู้ป่วยติดเตียงต้องการความช่วยเหลือ"\nพิกัด GPS: ${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}\n\nแนะนำให้กดปุ่ม "โทรสายด่วน 1784" เพื่อแจ้งเจ้าหน้าที่ให้จัดเตรียมเรือหรือรถยกสูงทันทีครับ`);
       } else {
-        alert(`✅ บันทึกสถานะเรียบร้อย!\n\nขอบคุณที่แจ้งสถานะ "ฉันปลอดภัยแล้ว" ข้อมูลนี้จะช่วยให้เจ้าหน้าที่กู้ภัยมุ่งเป้าไปช่วยเหลือผู้ประสบภัยที่ยังติดค้างได้อย่างรวดเร็ว`);
+        alert(`✅ บันทึกสถานะเรียบร้อย!\n\nขอบคุณที่แจ้งสถานะ "ฉันปลอดภัยแล้ว" ข้อมูลนี้จะช่วยให้เจ้าหน้าที่กู้ภัยมุ่งเป้าช่วยเหลือผู้ที่ยังติดค้างได้อย่างแม่นยำ`);
       }
     }
 
     function openGoogleNavigation() {
-      // Navigate to safe shelter near current coordinates
       const shelterLat = currentLat + 0.008;
       const shelterLon = currentLon + 0.006;
       window.open(`https://www.google.com/maps/dir/?api=1&origin=${currentLat},${currentLon}&destination=${shelterLat},${shelterLon}&travelmode=walking`, '_blank');
     }
 
-    // 6. REAL LEAFLET OPENSTREETMAP INITIALIZATION
     function initLeafletMap() {
       if (mapInstance) {
         updateMapPosition();
         return;
       }
-
       mapInstance = L.map('map').setView([currentLat, currentLon], 14);
-
-      // OpenStreetMap Tiles (Clean & Free)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap',
         maxZoom: 18
       }).addTo(mapInstance);
-
       updateMapPosition();
     }
 
     function updateMapPosition() {
       if (!mapInstance) return;
-
       mapInstance.setView([currentLat, currentLon], 14);
-
       if (userMarker) mapInstance.removeLayer(userMarker);
       if (shelterMarker) mapInstance.removeLayer(shelterMarker);
       if (floodCircle) mapInstance.removeLayer(floodCircle);
 
-      // User House Marker
       userMarker = L.marker([currentLat, currentLon]).addTo(mapInstance)
-        .bindPopup(`<b>บ้านของคุณ</b><br>${currentAddressStr}`)
-        .openPopup();
+        .bindPopup(`<b>บ้านของคุณ</b><br>${currentAddressStr}`).openPopup();
 
-      // Flood Inundation Risk Buffer (Red Circle)
       floodCircle = L.circle([currentLat + 0.002, currentLon - 0.001], {
         color: '#f43f5e',
         fillColor: '#f43f5e',
@@ -799,7 +833,6 @@
         radius: 400
       }).addTo(mapInstance).bindPopup("<b>โซนทับถมน้ำหลาก</b><br>ระดับน้ำล้นตลิ่ง");
 
-      // Safe Shelter Marker (Green)
       shelterMarker = L.marker([currentLat + 0.008, currentLon + 0.006]).addTo(mapInstance)
         .bindPopup("<b>จุดพักพิงปลอดภัย: โรงเรียนเทศบาล</b><br>พื้นที่เนินสูง มีศูนย์ปฐมพยาบาล");
     }
